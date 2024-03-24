@@ -15,69 +15,46 @@ class Migration(migrations.Migration):
             name='Doctor',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('first_name', models.CharField(max_length=100)),
-                ('last_name', models.CharField(max_length=100)),
-                ('contact_info', models.CharField(max_length=100)),
+                ('first_name', models.CharField(max_length=100, verbose_name='First name', help_text='Enter the doctor\'s first name')),
+                ('last_name', models.CharField(max_length=100, verbose_name='Last name', help_text='Enter the doctor\'s last name')),
+                ('contact_info', models.CharField(max_length=100, verbose_name='Contact info', help_text='Enter the doctor\'s contact info')),
             ],
         ),
         migrations.CreateModel(
             name='Patient',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('first_name', models.CharField(max_length=100)),
-                ('last_name', models.CharField(max_length=100)),
-                ('date_of_birth', models.DateField()),
-                ('gender', models.CharField(choices=[('Male', 'Male'), ('Female', 'Female')], max_length=10)),
-                ('contact_info', models.CharField(max_length=100)),
+                ('first_name', models.CharField(max_length=100, verbose_name='First name', help_text='Enter the patient\'s first name')),
+                ('last_name', models.CharField(max_length=100, verbose_name='Last name', help_text='Enter the patient\'s last name')),
+                ('date_of_birth', models.DateField(verbose_name='Date of birth', help_text='Enter the patient\'s date of birth')),
+                ('gender', models.CharField(choices=[('Male', 'Male'), ('Female', 'Female')], max_length=10, verbose_name='Gender', help_text='Enter the patient\'s gender')),
+                ('contact_info', models.CharField(max_length=100, verbose_name='Contact info', help_text='Enter the patient\'s contact info')),
             ],
         ),
         migrations.CreateModel(
             name='Service',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=100)),
-                ('description', models.TextField()),
-                ('cost', models.DecimalField(decimal_places=2, max_digits=10)),
+                ('name', models.CharField(max_length=100, verbose_name='Service name', help_text='Enter the service name')),
+                ('description', models.TextField(verbose_name='Service description', help_text='Enter the service description')),
+                ('cost', models.DecimalField(decimal_places=2, max_digits=10, verbose_name='Service cost', help_text='Enter the service cost')),
             ],
         ),
         migrations.CreateModel(
             name='Specialization',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=100)),
-                ('description', models.TextField(blank=True, null=True)),
+                ('name', models.CharField(max_length=100, verbose_name='Specialization name', help_text='Enter the specialization name')),
+                ('description', models.TextField(blank=True, null=True, verbose_name='Specialization description', help_text='Enter the specialization description')),
             ],
         ),
         migrations.CreateModel(
             name='Visit',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('visit_date_time', models.DateTimeField()),
-                ('status', models.CharField(choices=[('PLANNED', 'PLANNED'), ('COMPLETED', 'COMPLETED'), ('CANCELLED', 'CANCELLED')], max_length=20)),
-                ('description', models.TextField(blank=True, null=True)),
-            ],
-        ),
-        migrations.DeleteModel(
-            name='Item',
-        ),
-        migrations.AddField(
-            model_name='doctor',
-            name='specialization',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='api.specialization'),
-        ),
-        migrations.AddField(
-            model_name='visit',
-            name='doctor',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='api.doctor'),
-        ),
-        migrations.AddField(
-            model_name='visit',
-            name='patient',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='api.patient'),
-        ),
-        migrations.AddField(
-            model_name='visit',
-            name='service',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='api.service'),
-        ),
-    ]
+                ('visit_date_time', models.DateTimeField(verbose_name='Visit date and time', help_text='Enter the visit date and time')),
+                ('status', models.CharField(choices=[('PLANNED', 'Planned'), ('COMPLETED', 'Completed'), ('CANCELLED', 'Cancelled')], max_length=20, verbose_name='Visit status', help_text='Enter the visit status')),
+                ('description', models.TextField(blank=True, null=True, verbose_name='Visit description', help_text='Enter the visit description')),
+                ('doctor', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='visits', db_index=True, verbose_name='Doctor', help_text='Select the doctor for the visit')),
+                ('patient', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='visits', db_index=True, verbose_name='Patient', help_text='Select the patient for the visit')),
+                ('service', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='visits', db_index=True, verbose_name
