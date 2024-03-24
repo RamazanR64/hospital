@@ -1,15 +1,13 @@
 from api.mixins import HospitalGenericViewSet
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import mixins, filters
-
-from api.serializers.patient import PatientListSerializer
+from rest_framework import mixins, filters, permissions
 
 from api.models import Patient
-
-from api.serializers.patient import PatientDetailedSerializer
-
-from api.serializers.patient import PatientCreateOrUpdateSerializer
-
+from api.serializers import (
+    PatientListSerializer,
+    PatientDetailedSerializer,
+    PatientCreateOrUpdateSerializer
+)
 
 class PatientViewSet(
     HospitalGenericViewSet,
@@ -20,31 +18,28 @@ class PatientViewSet(
     mixins.DestroyModelMixin
 ):
     lookup_field = 'id'
+    queryset = Patient.objects.all()
+    permission_classes = [permissions.IsAuthenticated]
 
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_fields = ['gender']
     search_fields = ['first_name', 'last_name']
 
-    def get_action_permissions(self):
-        if self.action in ('list', 'retrieve'):
-            self.action_permissions = ['view_patient', ]
-        elif self.action == 'create':
-            self.action_permissions = ['add_patient', ]
-        elif self.action == 'update':
-            self.action_permissions = ['change_patient', ]
-        elif self.action == 'destroy':
-            self.action_permissions = ['delete_patient', ]
-
     def get_serializer_class(self):
         if self.action == 'list':
             return PatientListSerializer
-        if self.action == 'retrieve':
+        if self.action in ('retrieve', 'update', 'create'):
+            return PatientCreateOrUpdateSerializer
+        if self.action == 'destroy':
             return PatientDetailedSerializer
-        if self.action == 'create':
-            return PatientCreateOrUpdateSerializer
-        if self.action == 'update':
-            return PatientCreateOrUpdateSerializer
 
-
-    def get_queryset(self):
-        return Patient.objects.all()
+    def get_permissions(self):
+        if self.action in ('list', 'retrieve'):
+            self.permission_classes = [permissions.IsAuthenticated, 'view_patient']
+        elif self.action == 'create':
+            self.permission_classes = [permissions.IsAuthenticated, 'add_patient']
+        elif self.action == 'update':
+            self.permission_classes = [permissions.IsAuthenticated, 'change_patient']
+        elif self.action == 'destroy':
+            self.permission_classes = [permissions.IsAuthenticated, 'delete_patient']
+        return super().get_permissions()
