@@ -1,2 +1,12 @@
-from .doctor import DoctorView
-from .patient import PatientViewSet
+from django.urls import include, path
+from rest_framework.routers import DefaultRouter
+
+from . import views
+
+router = DefaultRouter()
+router.register(r'doctors', views.DoctorViewSet)
+router.register(r'patients', views.PatientViewSet)
+
+urlpatterns = [
+    path('', include(router.urls)),
+]
