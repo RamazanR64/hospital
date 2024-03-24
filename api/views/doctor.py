@@ -1,5 +1,5 @@
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets, mixins
+from rest_framework import viewsets, mixins, permissions
 from rest_framework.response import Response
 
 from api.mixins import HospitalGenericViewSet
@@ -12,7 +12,7 @@ from api.filters import DoctorFilterSet
 from api.serializers.patient import PatientListSerializer
 
 
-class DoctorView(
+class DoctorViewSet(
     HospitalGenericViewSet,
     mixins.ListModelMixin,
     mixins.UpdateModelMixin,
@@ -21,7 +21,7 @@ class DoctorView(
     mixins.DestroyModelMixin
 ):
     lookup_field = 'id'
-
+    permission_classes = [permissions.IsAuthenticated]
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['first_name', 'last_name', 'specialization']
     filterset_class = DoctorFilterSet
@@ -51,31 +51,46 @@ class DoctorView(
             return Patient.objects.all()
         return Doctor.objects.all()
 
+    @action(detail=True, methods=['get'], permission_classes=[permissions.IsAuthenticated])
     def list_patient(self, request, id):
-        queryset = self.get_queryset().filter(visits__doctor_id=id)
+        queryset = self.filter_queryset(self.get_queryset().filter(visits__doctor_id=id))
         serializer = self.get_serializer(queryset, many=True)
         return Response(data=serializer.data)
 
 
-class ServiceViewSet(viewsets.GenericViewSet,
-                     mixins.ListModelMixin,
-                     mixins.CreateModelMixin,
-                     mixins.RetrieveModelMixin,
-                     mixins.UpdateModelMixin,
-                     mixins.DestroyModelMixin):
+from rest_framework import viewsets, mixins, permissions
+
+from api.models import Service
+from api.serializers import ServiceSerializer
+
+
+class ServiceViewSet(
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
+):
     lookup_field = 'id'
+    permission_classes = [permissions.IsAuthenticated]
     queryset = Service.objects.all()
     serializer_class = ServiceSerializer
 
 
-class VisitViewSet(viewsets.GenericViewSet,
-                   mixins.ListModelMixin,
-                   mixins.CreateModelMixin,
-                   mixins.RetrieveModelMixin,
-                   mixins.UpdateModelMixin,
-                   mixins.DestroyModelMixin):
+from rest_framework import viewsets, mixins, permissions
+
+from api.models import Visit
+from api.serializers import VisitSerializer
+
+
+class VisitViewSet(
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
+):
     lookup_field = 'id'
+    permission_classes = [permissions.IsAuthenticated]
     queryset = Visit.objects.all()
     serializer_class = VisitSerializer
-
-
